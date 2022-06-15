@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/activity_main.xml" value="0.18645833333333334" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/choose_area.xml" value="0.22" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/list_item.xml" value="0.11141304347826086" />
       </map>
     </option>
   </component>
