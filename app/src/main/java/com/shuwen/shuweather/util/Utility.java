@@ -1,6 +1,7 @@
 package com.shuwen.shuweather.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.shuwen.shuweather.db.City;
 import com.shuwen.shuweather.db.County;
@@ -69,7 +70,7 @@ public class Utility {
                     County county = new County();
                     county.setCountyName(countyObject.getString("name"));
                     county.setWeatherId(countyObject.getString("weather_id"));
-                    county.setId(cityId);
+                    county.setCityId(cityId);  //此处bug，setCityId写成setId，导致保存数据库有问题，循环调用接口
                     county.save();
                 }
                 return true;
