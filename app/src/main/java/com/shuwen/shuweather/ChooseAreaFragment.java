@@ -86,9 +86,9 @@ public class ChooseAreaFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.choose_area, container, false);
-        titleText = (TextView) view.findViewById(R.id.title_text);
-        backButton = (Button) view.findViewById(R.id.back_button);
-        listView = (ListView) view.findViewById(R.id.list_view);
+        titleText = view.findViewById(R.id.title_text);
+        backButton = view.findViewById(R.id.back_button);
+        listView = view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
         return view;
@@ -173,7 +173,7 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCounties() {
         titleText.setText(selectedCity.getCityName());
         backButton.setVisibility(View.VISIBLE);
-        countyList = LitePal.where("cityId = ?", String.valueOf(1)).find(County.class);
+        countyList = LitePal.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);  //调试时将cityId写死成了1，修改回来
         if (countyList.size() > 0) {
             dataList.clear();
             for (County county :

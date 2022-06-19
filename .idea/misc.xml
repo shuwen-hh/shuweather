@@ -4,8 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/activity_main.xml" value="0.18645833333333334" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/activity_main2.xml" value="0.38645833333333335" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/activity_weather.xml" value="0.19022289766970618" />
         <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/choose_area.xml" value="0.22" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/forecast.xml" value="0.8785714285714286" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/forecast_item.xml" value="0.8785714285714286" />
         <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/list_item.xml" value="0.11141304347826086" />
+        <entry key="..\:/AndroidStudioProjects/shuweather/app/src/main/res/layout/now.xml" value="0.19022289766970618" />
       </map>
     </option>
   </component>
