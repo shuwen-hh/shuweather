@@ -6,11 +6,13 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.shuwen.shuweather.gson.ForeCast;
 import com.shuwen.shuweather.gson.Weather;
+import com.shuwen.shuweather.service.AutoUpdateService;
 import com.shuwen.shuweather.util.HttpUtil;
 import com.shuwen.shuweather.util.Utility;
 
@@ -201,6 +204,8 @@ public class WeatherActivity extends AppCompatActivity {
         carWashText.setText(carWash);
         sportText.setText(sport);
         weatherLayout.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
     }
 
     private void loadBingPic() {
