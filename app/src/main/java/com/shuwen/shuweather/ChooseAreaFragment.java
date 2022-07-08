@@ -3,6 +3,7 @@ package com.shuwen.shuweather;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.shuwen.shuweather.api.ApiService;
 import com.shuwen.shuweather.db.City;
 import com.shuwen.shuweather.db.County;
 import com.shuwen.shuweather.db.Province;
@@ -31,6 +33,7 @@ import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Response;
+import retrofit2.Callback;
 
 public class ChooseAreaFragment extends Fragment {
 
@@ -82,6 +85,11 @@ public class ChooseAreaFragment extends Fragment {
      */
     private int currentLevel;
 
+    /**
+     * 接口服务类
+     */
+    ApiService apiService;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -92,6 +100,7 @@ public class ChooseAreaFragment extends Fragment {
         listView = view.findViewById(R.id.list_view);
         adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
+        apiService = new ApiService();
         return view;
     }
 
@@ -141,123 +150,193 @@ public class ChooseAreaFragment extends Fragment {
      * 查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器上查询
      */
     private void queryProvinces() {
-        titleText.setText("中国");
-        backButton.setVisibility(View.GONE);
-        provinceList = LitePal.findAll(Province.class);
-        if (provinceList.size() > 0) {
-            dataList.clear();
-            for (Province province :
-                    provinceList) {
-                dataList.add(province.getProvinceName());
+//        titleText.setText("中国");
+//        backButton.setVisibility(View.GONE);
+//        provinceList = LitePal.findAll(Province.class);
+//        if (provinceList.size() > 0) {
+//            dataList.clear();
+//            for (Province province :
+//                    provinceList) {
+//                dataList.add(province.getProvinceName());
+//            }
+//            adapter.notifyDataSetChanged();
+//            listView.setSelection(0);
+//            currentLevel = LEVEL_PROVINCE;
+//        } else {
+//            String address = "http://guolin.tech/api/china";
+//            queryFromServer(address, "province");
+//        }
+        apiService.queryProvinces(new Callback<List<Province>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<Province>> call, retrofit2.Response<List<Province>> response) {
+                titleText.setText("中国");
+                backButton.setVisibility(View.GONE);
+                provinceList = response.body();
+                dataList.clear();
+                for (Province province :
+                        provinceList) {
+                    dataList.add(province.getProvinceName());
+                }
+                adapter.notifyDataSetChanged();
+                listView.setSelection(0);
+                currentLevel = LEVEL_PROVINCE;
             }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            currentLevel = LEVEL_PROVINCE;
-        } else {
-            String address = "http://guolin.tech/api/china";
-            queryFromServer(address, "province");
-        }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<Province>> call, Throwable t) {
+                closeProgressDialog();
+                Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * 查询全国所有的市，优先从数据库查询，如果没有查询到再去服务器上查询
      */
     private void queryCities() {
-        titleText.setText(selectedProvince.getProvinceName());
-        backButton.setVisibility(View.VISIBLE);
-        cityList = LitePal.where("provinceId = ?", String.valueOf(selectedProvince.getId())).find(City.class);
-        if (cityList.size() > 0) {
-            dataList.clear();
-            for (City city :
-                    cityList) {
-                dataList.add(city.getCityName());
+//        titleText.setText(selectedProvince.getProvinceName());
+//        backButton.setVisibility(View.VISIBLE);
+//        cityList = LitePal.where("provinceId = ?", String.valueOf(selectedProvince.getId())).find(City.class);
+//        if (cityList.size() > 0) {
+//            dataList.clear();
+//            for (City city :
+//                    cityList) {
+//                dataList.add(city.getCityName());
+//            }
+//            adapter.notifyDataSetChanged();
+//            listView.setSelection(0);
+//            currentLevel = LEVEL_CITY;
+//        } else {
+//            int provinceCode = selectedProvince.getId();
+//            String address = "http://guolin.tech/api/china/" + provinceCode;
+//            queryFromServer(address, "city");
+//        }
+        apiService.queryCities(selectedProvince.getId(), new Callback<List<City>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<City>> call, retrofit2.Response<List<City>> response) {
+                cityList = response.body();
+                titleText.setText(selectedProvince.getProvinceName());
+                backButton.setVisibility(View.VISIBLE);
+                if (cityList.size() > 0) {
+                    dataList.clear();
+                    for (City city :
+                            cityList) {
+                        dataList.add(city.getCityName());
+                    }
+                    adapter.notifyDataSetChanged();
+                    listView.setSelection(0);
+                    currentLevel = LEVEL_CITY;
+                }
             }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            currentLevel = LEVEL_CITY;
-        } else {
-            int provinceCode = selectedProvince.getProvinceCode();
-            String address = "http://guolin.tech/api/china/" + provinceCode;
-            queryFromServer(address, "city");
-        }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<City>> call, Throwable t) {
+                closeProgressDialog();
+                Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
      * 查询全国所有的县，优先从数据库查询，如果没有查询到再去服务器上查询
      */
     private void queryCounties() {
-        titleText.setText(selectedCity.getCityName());
-        backButton.setVisibility(View.VISIBLE);
-        countyList = LitePal.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);  //调试时将cityId写死成了1，修改回来
-        if (countyList.size() > 0) {
-            dataList.clear();
-            for (County county :
-                    countyList) {
-                dataList.add(county.getCountyName());
-            }
-            adapter.notifyDataSetChanged();
-            listView.setSelection(0);
-            currentLevel = LEVEL_COUNTY;
-        } else {
-            int provinceCode = selectedProvince.getProvinceCode();
-            int cityCode = selectedCity.getCityCode();
-            String address = "http://guolin.tech/api/china/" + provinceCode + "/" + cityCode;
-            queryFromServer(address, "county");
-        }
-    }
-
-    /**
-     * 根据传入的地址和类型从服务器上查询省市县数据
-     */
-    private void queryFromServer(String address, final String type) {
-        showProgressDialog();
-        HttpUtil.sendOkHttpRequest(address, new okhttp3.Callback() {
+//        titleText.setText(selectedCity.getCityName());
+//        backButton.setVisibility(View.VISIBLE);
+//        countyList = LitePal.where("cityId = ?", String.valueOf(selectedCity.getId())).find(County.class);  //调试时将cityId写死成了1，修改回来
+//        if (countyList.size() > 0) {
+//            dataList.clear();
+//            for (County county :
+//                    countyList) {
+//                dataList.add(county.getCountyName());
+//            }
+//            adapter.notifyDataSetChanged();
+//            listView.setSelection(0);
+//            currentLevel = LEVEL_COUNTY;
+//        } else {
+//            int provinceCode = selectedProvince.getId();
+//            int cityCode = selectedCity.getId();
+//            String address = "http://guolin.tech/api/china/" + provinceCode + "/" + cityCode;
+//            queryFromServer(address, "county");
+//        }
+        apiService.queryCounties(selectedProvince.getId(), selectedCity.getId(), new Callback<List<County>>() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        closeProgressDialog();
-                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+            public void onResponse(retrofit2.Call<List<County>> call, retrofit2.Response<List<County>> response) {
+                countyList = response.body();
+                titleText.setText(selectedCity.getCityName());
+                backButton.setVisibility(View.VISIBLE);
+                if (countyList.size() > 0) {
+                    dataList.clear();
+                    for (County county :
+                            countyList) {
+                        dataList.add(county.getCountyName());
                     }
-                });
+                    adapter.notifyDataSetChanged();
+                    listView.setSelection(0);
+                    currentLevel = LEVEL_COUNTY;
+                }
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String responseText = response.body().string();
-                boolean result = false;
-                if("province".equals(type)) {
-                    result = Utility.handleProvinceResponse(responseText);
-                } else if ("city".equals(type)) {
-                    result = Utility.handleCityResponse(responseText, selectedProvince.getId());
-                } else if ("county".equals(type)) {
-                    result = Utility.handleCountyResponse(responseText, selectedCity.getId());
-                }
-                if (result) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            closeProgressDialog();
-                            if("province".equals(type)) {
-                                queryProvinces();
-                            } else if ("city".equals(type)) {
-                                queryCities();
-                            } else if ("county".equals(type)) {
-                                queryCounties();
-                            }
-                        }
-                    });
-                }
+            public void onFailure(retrofit2.Call<List<County>> call, Throwable t) {
+                closeProgressDialog();
+                Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     /**
+     * 根据传入的地址和类型从服务器上查询省市县数据
+     */
+//    private void queryFromServer(String address, final String type) {
+//        showProgressDialog();
+//        HttpUtil.sendOkHttpRequest(address, new okhttp3.Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        closeProgressDialog();
+//                        Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                String responseText = response.body().string();
+//                boolean result = false;
+//                if ("province".equals(type)) {
+//                    result = Utility.handleProvinceResponse(responseText);
+//                } else if ("city".equals(type)) {
+//                    result = Utility.handleCityResponse(responseText, selectedProvince.getId());
+//                } else if ("county".equals(type)) {
+//                    result = Utility.handleCountyResponse(responseText, selectedCity.getId());
+//                }
+//                if (result) {
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            closeProgressDialog();
+//                            if ("province".equals(type)) {
+//                                queryProvinces();
+//                            } else if ("city".equals(type)) {
+//                                queryCities();
+//                            } else if ("county".equals(type)) {
+//                                queryCounties();
+//                            }
+//                        }
+//                    });
+//                }
+//            }
+//        });
+//    }
+
+    /**
      * 现实进度对话框
      */
     private void showProgressDialog() {
-        if(progressDialog == null) {
+        if (progressDialog == null) {
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setDismissMessage(null);
             progressDialog.setCanceledOnTouchOutside(false);

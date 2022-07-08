@@ -1,16 +1,15 @@
 package com.shuwen.shuweather.db;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.litepal.crud.LitePalSupport;
 
 public class City extends LitePalSupport {
 
     private int id;
 
+    @SerializedName("name")
     private String cityName;
-
-    private int cityCode;
-
-    private int provinceId;
 
     public int getId() {
         return id;
@@ -26,21 +25,5 @@ public class City extends LitePalSupport {
 
     public void setCityName(String cityName) {
         this.cityName = cityName;
-    }
-
-    public int getCityCode() {
-        return cityCode;
-    }
-
-    public void setCityCode(int cityCode) {
-        this.cityCode = cityCode;
-    }
-
-    public int getProvinceId() {
-        return provinceId;
-    }
-
-    public void setProvinceId(int provinceId) {
-        this.provinceId = provinceId;
     }
 }

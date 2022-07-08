@@ -1,11 +1,14 @@
 package com.shuwen.shuweather.db;
 
+import com.google.gson.annotations.SerializedName;
+
 import org.litepal.crud.LitePalSupport;
 
 public class County extends LitePalSupport {
 
     private int id;
 
+    @SerializedName("name")
     private String countyName;
 
     private String weatherId;
